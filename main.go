@@ -3,13 +3,19 @@ package main
 import (
 	"log"
 	"net/http"
+	"path/filepath"
+	"time"
 
 	"html/template"
 )
 
 func main() {
 	// Load templates
-	templates, err := template.ParseFiles("./templates/index.html")
+	files, err := filepath.Glob("./templates/*.html")
+	if err != nil {
+		log.Fatalf("Error finding templates: %v", err)
+	}
+	templates, err := template.ParseFiles(files...)
 	if err != nil {
 		log.Fatalf("Error loading templates: %v", err)
 	}
@@ -21,7 +27,7 @@ func main() {
 	// Home route
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		data := map[string]interface{}{
-			"Title": "Welcome to Miviro",
+			"Title": "miviro.es",
 			// Add more data as needed
 		}
 
@@ -31,11 +37,16 @@ func main() {
 		}
 	})
 
-	// Example dynamic route for HTMX
-	http.HandleFunc("/fetch-data", func(w http.ResponseWriter, r *http.Request) {
-		// Example dynamic content
-		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte("<p class='text-green-500'>Data fetched successfully!</p>"))
+	// Handle dynamic test.html rendering
+	http.HandleFunc("/test.html", func(w http.ResponseWriter, r *http.Request) {
+		data := map[string]interface{}{
+			"Time": time.Now().Format("2006-01-02 15:04:05"), // Format time dynamically
+		}
+
+		// Render the test.html template
+		if err := templates.ExecuteTemplate(w, "test.html", data); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
 	})
 
 	// Start the server
