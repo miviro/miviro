@@ -5,16 +5,25 @@
     <title>{{.Title}}</title>
     <link href="/static/css/output.css" rel="stylesheet">
 </head>
-<body class="bg-gray-100 flex items-center justify-center h-screen">
-    <div class="bg-white p-6 rounded shadow-md">
-        <button 
-            class="bg-blue-500 text-white px-4 py-2 rounded"
-            hx-get="/test.html"
-            hx-target="#data"
-            hx-swap="innerHTML">
-            miviro.es !
-        </button>
-        <div id="data" class="mt-4"></div>
+<body class="bg-gray-100">
+    <nav class="p-4">
+        <a href="https://github.com/miviro" class="text-blue-600 hover:text-blue-800">GitHub</a>
+    </nav>
+    
+    <div class="flex">
+        <aside class="w-1/4 p-4">
+            <ul class="space-y-2">
+                <li>Article 1</li>
+                <li>Article 2</li>
+                <li>Article 3</li>
+            </ul>
+        </aside>
+        
+        <main class="w-3/4 p-4 flex items-center justify-center">
+            <p class="text-sm text-gray-600 max-w-md">
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+            </p>
+        </main>
     </div>
     <script src="/static/js/main.js"></script>
 </body>
