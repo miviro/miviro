@@ -4,10 +4,24 @@ import (
 	"log"
 	"net/http"
 	"path/filepath"
-	"time"
 
 	"html/template"
 )
+
+// Article represents a single article
+type Article struct {
+	Title string
+	Link  string
+}
+
+// PageData represents the data for the page
+type PageData struct {
+	PageTitle    string
+	SidebarTitle string
+	TextTitle    string
+	TextContent  string
+	Articles     []Article
+}
 
 func main() {
 	// Load templates
@@ -26,25 +40,21 @@ func main() {
 
 	// Home route
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		data := map[string]interface{}{
-			"Title": "miviro.es",
-			// Add more data as needed
+		// Dynamic data
+		data := PageData{
+			PageTitle:    "miviro",
+			SidebarTitle: "Articles",
+			TextTitle:    "Homepage",
+			TextContent:  "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+			Articles: []Article{
+				{Title: "Article 1", Link: "/static/md/test.md"},
+				{Title: "Article 2", Link: "/article2"},
+				{Title: "Article 3", Link: "/article3"},
+			},
 		}
 
 		// Render the index.html template
 		if err := templates.ExecuteTemplate(w, "index.html", data); err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-		}
-	})
-
-	// Handle dynamic test.html rendering
-	http.HandleFunc("/test.html", func(w http.ResponseWriter, r *http.Request) {
-		data := map[string]interface{}{
-			"Time": time.Now().Format("2006-01-02 15:04:05"), // Format time dynamically
-		}
-
-		// Render the test.html template
-		if err := templates.ExecuteTemplate(w, "test.html", data); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
 	})

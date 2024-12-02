@@ -1,30 +1,47 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
-    <title>{{.Title}}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.PageTitle}}</title>
     <link href="/static/css/output.css" rel="stylesheet">
 </head>
+
 <body class="bg-gray-100">
-    <nav class="p-4">
-        <a href="https://github.com/miviro" class="text-blue-600 hover:text-blue-800">GitHub</a>
-    </nav>
-    
-    <div class="flex">
-        <aside class="w-1/4 p-4">
-            <ul class="space-y-2">
-                <li>Article 1</li>
-                <li>Article 2</li>
-                <li>Article 3</li>
-            </ul>
-        </aside>
-        
-        <main class="w-3/4 p-4 flex items-center justify-center">
-            <p class="text-sm text-gray-600 max-w-md">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-            </p>
-        </main>
+    <div class="container mx-auto p-4 bg-gray-100 min-h-screen">
+        <!-- Header -->
+        <header class="text-center mb-8">
+            <h1 class="text-4xl font-bold">{{.PageTitle}}</h1>
+        </header>
+
+        <!-- Main Content -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <!-- Sidebar -->
+            <aside class="col-span-1 md:col-span-1 bg-white shadow rounded p-4">
+                <h2 class="text-xl font-semibold mb-4">{{.SidebarTitle}}</h2>
+                <ul class="space-y-2">
+                    {{range .Articles}}
+                    <li>
+                        <!-- TODO: no hace caso de h1, h2, ni nada. HAcer que use tailwind-->
+                        <a href="{{.Link}}" class="text-blue-500 hover:underline" onclick="event.preventDefault(); fetch('{{.Link}}').then(res => res.text()).then(mdContent => { const md = window.markdownit(); document.querySelector('main').innerHTML = md.render(mdContent); });">
+                            {{.Title}}
+                        </a>
+                    </li>
+                    {{end}}
+                </ul>
+            </aside>
+
+            <!-- Main Section -->
+            <main class="col-span-1 md:col-span-3 bg-white shadow rounded p-4">
+                <h2 class="text-2xl font-semibold mb-4">{{.TextTitle}}</h2>
+                <div>
+                    <p>{{.TextContent}}</p>
+                </div>
+            </main>
+        </div>
     </div>
     <script src="/static/js/main.js"></script>
 </body>
+
 </html>

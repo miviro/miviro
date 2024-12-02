@@ -9,7 +9,7 @@
     "watch:css": "npx tailwindcss -i ./static/css/tailwind.css -o ./static/css/output.css --watch",
     "build:js": "vite build",
     "watch:js": "vite build --watch"
-   },
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "alpinejs": "^3.14.5",
-    "htmx.org": "^1.9.12"
+    "htmx.org": "^1.9.12",
+    "markdown-it": "^14.1.0"
   }
 }
