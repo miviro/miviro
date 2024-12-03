@@ -63,4 +63,15 @@
     thead th {
       @apply bg-gray-100;
     }
+
+    #gol {
+      left: 0;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      width: 100%;
+      z-index: -1;
+    }
   }
+
+  
