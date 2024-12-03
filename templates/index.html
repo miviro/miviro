@@ -13,7 +13,9 @@
         <!-- Header -->
         <header class="text-center mb-8">
             <h1 class="text-4xl font-bold cursor-pointer">
-                <a href="/">{{.PageTitle}}</a>
+                <a href="/" hx-get="/articles/index" hx-target="main" hx-swap="innerHTML" hx-push-url="/">
+                    {{.PageTitle}}
+                </a>
             </h1>
         </header>
 
@@ -42,7 +44,7 @@
                 <article class="prose mx-auto p-4" x-data="{ showContent: true }">
                     <header>
                         <h1>{{.ArticleTitle}}</h1>
-                        {{if not .IsHomepage}}
+                        {{if .IsHomepage}}
                         <p>{{.ArticleDate}} - {{.ArticleReadingTime}} read</p>
                         {{end}}
                     </header>
