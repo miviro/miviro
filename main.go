@@ -18,7 +18,7 @@ type ArticleTemplateData struct {
 	ArticleName        string
 	ArticleTitle       string
 	ArticleDate        string
-	ArticleContent     string
+	ArticleContent     template.HTML
 	ArticleReadingTime string
 	IsHomepage         bool
 }
@@ -35,7 +35,7 @@ type IndexTemplateData struct {
 	ArticleTitle        string
 	ArticleDate         string
 	ArticleReadingTime  string
-	ArticleContent      string
+	ArticleContent      template.HTML
 	IsHomepage          bool
 	ArticleTemplateData map[string]ArticleTemplateData
 }
@@ -110,7 +110,7 @@ func main() {
 			data.ArticleTitle = article.ArticleTitle
 			data.ArticleDate = article.ArticleDate
 			data.ArticleReadingTime = article.ArticleReadingTime
-			data.ArticleContent = article.ArticleContent
+			data.ArticleContent = template.HTML(article.ArticleContent)
 			data.IsHomepage = articleName == "index"
 		} else {
 			data.ArticleTitle = "404 Not Found"
@@ -126,6 +126,9 @@ func main() {
 
 	// ArticleTemplateData route
 	http.HandleFunc("/articles/", func(w http.ResponseWriter, r *http.Request) {
+		// Set content type to HTML
+		w.Header().Set("Content-Type", "text/html")
+
 		// Extract the article name from the URL path
 		articleName := r.URL.Path[len("/articles/"):]
 
@@ -155,6 +158,7 @@ func loadArticles() {
 	}
 
 	articles = make(map[string]ArticleTemplateData)
+
 	for _, file := range mdFiles {
 		content, err := os.ReadFile(file)
 		if err != nil {
@@ -193,13 +197,12 @@ func loadArticles() {
 
 		// Parse the markdown content to HTML
 		htmlContent := markdown.ToHTML([]byte(strings.Join(lines, "\n")), nil, nil)
-		articleContent := string(htmlContent)
 
 		article := ArticleTemplateData{
 			ArticleName:        strings.TrimSuffix(filepath.Base(file), ".md"),
 			ArticleTitle:       title,
 			ArticleDate:        info.ModTime().Format("2006-01-02"), // Use the file's modification time as the date
-			ArticleContent:     articleContent,
+			ArticleContent:     template.HTML(htmlContent),
 			ArticleReadingTime: fmt.Sprintf("%d min", readingTime),
 		}
 
