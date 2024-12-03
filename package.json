@@ -21,7 +21,10 @@
   },
   "dependencies": {
     "alpinejs": "^3.14.5",
+    "highlight.js": "^11.10.0",
     "htmx.org": "^1.9.12",
-    "markdown-it": "^14.1.0"
+    "markdown-it": "^14.1.0",
+    "md-block": "^0.0.1",
+    "prismjs": "^1.29.0"
   }
 }

@@ -12,7 +12,9 @@
     <div class="container mx-auto p-4 bg-gray-100 min-h-screen">
         <!-- Header -->
         <header class="text-center mb-8">
-            <h1 class="text-4xl font-bold">{{.PageTitle}}</h1>
+            <h1 class="text-4xl font-bold cursor-pointer">
+                <a href="/">{{.PageTitle}}</a>
+            </h1>
         </header>
 
         <!-- Main Content -->
@@ -21,11 +23,12 @@
             <aside class="col-span-1 md:col-span-1 bg-white shadow rounded p-4">
                 <h2 class="text-xl font-semibold mb-4">{{.SidebarTitle}}</h2>
                 <ul class="space-y-2">
-                    {{range .Articles}}
+                    {{range .ArticleTemplateDatas}}
                     <li>
-                        <!-- TODO: no hace caso de h1, h2, ni nada. HAcer que use tailwind-->
-                        <a href="{{.Link}}" class="text-blue-500 hover:underline" onclick="event.preventDefault(); fetch('{{.Link}}').then(res => res.text()).then(mdContent => { const md = window.markdownit(); document.querySelector('main').innerHTML = md.render(mdContent); });">
-                            {{.Title}}
+                        <a href="{{.ArticleName}}" class="text-blue-500 hover:underline"
+                            hx-get="/articles/{{.ArticleName}}" hx-target="main" hx-swap="innerHTML"
+                            hx-push-url="{{.ArticleName}}">
+                            {{.ArticleTitle}}
                         </a>
                     </li>
                     {{end}}
@@ -33,11 +36,8 @@
             </aside>
 
             <!-- Main Section -->
-            <main class="col-span-1 md:col-span-3 bg-white shadow rounded p-4">
-                <h2 class="text-2xl font-semibold mb-4">{{.TextTitle}}</h2>
-                <div>
-                    <p>{{.TextContent}}</p>
-                </div>
+            <main class="col-span-1 md:col-span-3 bg-white shadow rounded p-4" hx-get="/articles/{{.CurrentAddress}}"
+                hx-trigger="load" hx-target="this" hx-swap="innerHTML">
             </main>
         </div>
     </div>
