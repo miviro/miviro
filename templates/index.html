@@ -44,7 +44,7 @@
                 <article class="prose mx-auto p-4" x-data="{ showContent: true }">
                     <header>
                         <h1>{{.ArticleTitle}}</h1>
-                        {{if .IsHomepage}}
+                        {{if not .IsHomepage}}
                         <p>{{.ArticleDate}} - {{.ArticleReadingTime}} read</p>
                         {{end}}
                     </header>
