@@ -6,4 +6,61 @@
     h1 {
       @apply text-xl font-semibold mb-4;
     }
+    h2 {
+      @apply text-lg font-semibold mb-3;
+    }
+
+    h3 {
+      @apply text-base font-semibold mb-2;
+    }
+
+    p {
+      @apply mb-4;
+    }
+
+    a {
+      @apply text-blue-500 hover:underline;
+    }
+
+    ul,
+    ol {
+      @apply list-disc list-inside mb-4;
+    }
+
+    li {
+      @apply mb-1;
+    }
+
+    strong {
+      @apply font-bold;
+    }
+
+    em {
+      @apply italic;
+    }
+
+    blockquote {
+      @apply border-l-4 border-gray-300 pl-4 italic mb-4;
+    }
+
+    code {
+      @apply font-mono text-sm bg-gray-100 p-1 rounded;
+    }
+
+    pre {
+      @apply font-mono text-sm bg-gray-100 p-2 rounded overflow-auto;
+    }
+
+    table {
+      @apply border-collapse w-full mb-4;
+    }
+
+    th,
+    td {
+      @apply border px-2 py-1;
+    }
+
+    thead th {
+      @apply bg-gray-100;
+    }
   }
