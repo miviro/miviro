@@ -1,7 +1,9 @@
 package main
 
 import (
+	"compress/gzip"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -40,6 +42,59 @@ type IndexTemplateData struct {
 	ArticleTemplateData map[string]ArticleTemplateData
 }
 
+type gzipResponseWriter struct {
+	http.ResponseWriter
+	io.Writer
+}
+
+func (w *gzipResponseWriter) Write(b []byte) (int, error) {
+	return w.Writer.Write(b)
+}
+
+// compressStaticFiles compresses all static files
+func compressStaticFiles() {
+	err := filepath.Walk("./static", func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if !info.IsDir() && !strings.HasSuffix(path, ".gz") {
+			if info.Size() > 2*1024 {
+				compressFile(path)
+			}
+		}
+		return nil
+	})
+	if err != nil {
+		log.Printf("Error compressing static files: %v", err)
+	}
+}
+
+// compressFile compresses a single file using gzip
+func compressFile(path string) {
+	file, err := os.Open(path)
+	if err != nil {
+		log.Printf("Error opening file %s: %v", path, err)
+		return
+	}
+	defer file.Close()
+
+	gzPath := path + ".gz"
+	gzFile, err := os.Create(gzPath)
+	if err != nil {
+		log.Printf("Error creating gzip file %s: %v", gzPath, err)
+		return
+	}
+	defer gzFile.Close()
+
+	gzWriter := gzip.NewWriter(gzFile)
+	defer gzWriter.Close()
+
+	_, err = io.Copy(gzWriter, file)
+	if err != nil {
+		log.Printf("Error compressing file %s: %v", path, err)
+	}
+}
+
 const mdDir = "./static/md"
 
 func main() {
@@ -54,16 +109,42 @@ func main() {
 	}
 
 	// Serve static files
-	fs := http.FileServer(http.Dir("./static"))
-	http.Handle("/static/", http.StripPrefix("/static/", fs))
+	gzipHandler := func(h http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if !strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
+				h.ServeHTTP(w, r)
+				return
+			}
+			w.Header().Set("Content-Encoding", "gzip")
+			gz := gzip.NewWriter(w)
+			defer gz.Close()
+			h.ServeHTTP(&gzipResponseWriter{ResponseWriter: w, Writer: gz}, r)
+		})
+	}
+	http.Handle("/static/", http.StripPrefix("/static/", gzipHandler(http.FileServer(http.Dir("./static")))))
 
+	// Initial setup
+	compressStaticFiles()
 	loadArticles()
+
+	// Create a single watcher
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
 		log.Fatalf("Error creating file watcher: %v", err)
 	}
 	defer watcher.Close()
 
+	// Add directories to watcher
+	err = watcher.Add("./static")
+	if err != nil {
+		log.Fatalf("Error adding watcher to static directory: %v", err)
+	}
+	err = watcher.Add(mdDir)
+	if err != nil {
+		log.Fatalf("Error adding watcher to markdown directory: %v", err)
+	}
+
+	// Watch for changes
 	go func() {
 		for {
 			select {
@@ -71,9 +152,27 @@ func main() {
 				if !ok {
 					return
 				}
-				if event.Op&fsnotify.Write == fsnotify.Write || event.Op&fsnotify.Create == fsnotify.Create || event.Op&fsnotify.Remove == fsnotify.Remove {
-					log.Println("Detected change in markdown files, reloading articles...")
-					loadArticles()
+				// Handle static file changes
+				if strings.HasPrefix(event.Name, "./static") {
+					if event.Op&fsnotify.Create == fsnotify.Create && !strings.HasSuffix(event.Name, ".gz") {
+						// Get file info
+						info, err := os.Stat(event.Name)
+						if err != nil {
+							log.Printf("Error getting file info %s: %v", event.Name, err)
+							continue
+						}
+						// Only compress files larger than 2KB
+						if info.Size() > 2*1024 {
+							compressFile(event.Name)
+						}
+					}
+				}
+				// Handle markdown file changes
+				if strings.HasPrefix(event.Name, mdDir) {
+					if event.Op&(fsnotify.Write|fsnotify.Create|fsnotify.Remove) != 0 {
+						log.Println("Detected change in markdown files, reloading articles...")
+						loadArticles()
+					}
 				}
 			case err, ok := <-watcher.Errors:
 				if !ok {
@@ -83,11 +182,6 @@ func main() {
 			}
 		}
 	}()
-
-	err = watcher.Add(mdDir)
-	if err != nil {
-		log.Fatalf("Error adding watcher to directory: %v", err)
-	}
 
 	// Home route
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
