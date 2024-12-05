@@ -27,4 +27,4 @@ npm run build:js
 /usr/local/go/bin/go build -o miviro
 
 # Start the Go server
-./miviro
+./miviro > log.txt 2>&1

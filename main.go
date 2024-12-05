@@ -95,7 +95,7 @@ func compressFile(path string) {
 	}
 }
 
-const mdDir = "./static/md"
+const mdDir = "./static/md/"
 
 func main() {
 	// Load templates
@@ -152,6 +152,13 @@ func main() {
 				if !ok {
 					return
 				}
+				// Handle markdown file changes
+				if strings.HasPrefix("./"+event.Name, mdDir) {
+					if event.Op&(fsnotify.Write|fsnotify.Create|fsnotify.Remove) != 0 {
+						log.Println("Detected change in markdown files, reloading articles...")
+						loadArticles()
+					}
+				}
 				// Handle static file changes
 				if strings.HasPrefix(event.Name, "./static") {
 					if event.Op&fsnotify.Create == fsnotify.Create && !strings.HasSuffix(event.Name, ".gz") {
@@ -165,13 +172,6 @@ func main() {
 						if info.Size() > 2*1024 {
 							compressFile(event.Name)
 						}
-					}
-				}
-				// Handle markdown file changes
-				if strings.HasPrefix(event.Name, mdDir) {
-					if event.Op&(fsnotify.Write|fsnotify.Create|fsnotify.Remove) != 0 {
-						log.Println("Detected change in markdown files, reloading articles...")
-						loadArticles()
 					}
 				}
 			case err, ok := <-watcher.Errors:
@@ -246,7 +246,7 @@ func main() {
 }
 
 func loadArticles() {
-	mdFiles, err := filepath.Glob("./static/md/*.md")
+	mdFiles, err := filepath.Glob(mdDir + "*.md")
 	if err != nil {
 		log.Fatalf("Error finding markdown files: %v", err)
 	}

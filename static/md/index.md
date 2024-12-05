@@ -1,2 +1,6 @@
-# Homepage
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+# Welcome to miviro.es!
+This is a personal blog for my projects and ideas. Enjoy!
+
+## Useful links
+- [GitHub](https://github.com/miviro/)
+- [Source code](https://github.com/miviro/miviro)
