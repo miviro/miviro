@@ -3,8 +3,9 @@
     <header>
         <h1>{{.ArticleTitle}}</h1>
         {{if not .IsHomepage}}
-        <p>{{.ArticleDate}} - {{.ArticleReadingTime}} read</p>
-        {{end}}    </header>
+        <p class="text-gray-500 italic">{{.ArticleDate}} - {{.ArticleReadingTime}} read</p>
+        {{end}}
+    </header>
     <section>
         <div>{{.ArticleContent}}</div>
     </section>

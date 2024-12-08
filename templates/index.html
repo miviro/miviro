@@ -14,7 +14,7 @@
     <!-- Header -->
     <header class="text-center m-5">
         <h1 class="text-4xl font-bold cursor-pointer">
-            <a href="/" hx-get="/articles/index" hx-target="main" hx-swap="innerHTML" hx-push-url="/">
+            <a href="/" hx-get="/articles/index" hx-target="main" hx-swap="innerHTML" hx-push-url="/" id="page-title">
                 {{.PageTitle}}
             </a>
         </h1>
@@ -46,7 +46,7 @@
                     <header>
                         <h1>{{.ArticleTitle}}</h1>
                         {{if not .IsHomepage}}
-                        <p>{{.ArticleDate}} - {{.ArticleReadingTime}} read</p>
+                        <p class="text-gray-500 italic">{{.ArticleDate}} - {{.ArticleReadingTime}} read</p>
                         {{end}}
                     </header>
                     <section>
