@@ -14,7 +14,7 @@ async function loadParticles(options) {
 
 const configs = {
     particles: {
-        number: { value: 100 },
+        number: { value: window.innerWidth / 100 },
         color: { value: "#ffffff" },
         links: { enable: true, distance: 200 },
         shape: { type: "circle" },
@@ -28,9 +28,9 @@ const configs = {
 
 loadParticles(configs);
 Alpine.start();
-window.particlesInitialized = true;
 
 // Re-initialize particles on history restore
 document.body.addEventListener('htmx:historyRestore', () => {
     loadParticles(configs);
 });
+

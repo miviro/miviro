@@ -5,3 +5,5 @@ En esta entrada describiré el diseño y la creación de un sistema de tracking 
 - Stepper motors
 - Impresora 3D
 - Microcontrolador
+
+<script src="https://gist.github.com/miviro/f6bf37618a09e7dbdf077d80f4a0aec2.js"></script>
