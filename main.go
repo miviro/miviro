@@ -232,6 +232,15 @@ func main() {
 			data.ArticleContent = "The page you are looking for does not exist."
 		}
 
+		// Check if the client accepts gzip encoding
+		// TODO: preload the gzip
+		if strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
+			w.Header().Set("Content-Encoding", "gzip")
+			gz := gzip.NewWriter(w)
+			defer gz.Close()
+			w = &gzipResponseWriter{ResponseWriter: w, Writer: gz}
+		}
+
 		// Render the article.html template
 		if err := templates.ExecuteTemplate(w, "article.html", data); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
