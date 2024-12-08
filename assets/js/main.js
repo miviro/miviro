@@ -29,6 +29,36 @@ const configs = {
 loadParticles(configs);
 Alpine.start();
 
+
+document.querySelectorAll('img').forEach(img => {
+    img.addEventListener('click', () => {
+        const src = img.src;
+        const match = src.match(/(.*)_compressed_(.*)\.jpg$/);
+        if (match) {
+            const newSrc = `${match[1]}.${match[2]}`;
+            const modal = document.createElement('div');
+            modal.style.position = 'fixed';
+            modal.style.top = '50%';
+            modal.style.left = '50%';
+            modal.style.transform = 'translate(-50%, -50%)';
+            modal.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
+            modal.style.padding = '20px';
+            modal.style.zIndex = '1000';
+
+            const newImg = document.createElement('img');
+            newImg.src = newSrc;
+            newImg.style.maxWidth = '90vw';
+            newImg.style.maxHeight = '90vh';
+
+            modal.appendChild(newImg);
+            document.body.appendChild(modal);
+
+            modal.addEventListener('click', () => {
+                document.body.removeChild(modal);
+            });
+        }
+    });
+});
 // Re-initialize particles on history restore
 document.body.addEventListener('htmx:historyRestore', () => {
     loadParticles(configs);

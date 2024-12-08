@@ -3,6 +3,9 @@ package main
 import (
 	"compress/gzip"
 	"fmt"
+	"image"
+	"image/jpeg"
+	"image/png"
 	"io"
 	"log"
 	"net/http"
@@ -11,6 +14,8 @@ import (
 	"strings"
 
 	"html/template"
+
+	"golang.org/x/image/draw"
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/gomarkdown/markdown"
@@ -60,6 +65,8 @@ func compressStaticFiles() {
 		if !info.IsDir() {
 			if shouldCompressFile(path, info.Size()) {
 				compressFile(path)
+			} else if shouldCompressImage(path) {
+				compressImage(path)
 			}
 		}
 		return nil
@@ -161,7 +168,7 @@ func main() {
 				}
 				// Handle static file changes
 				if strings.HasPrefix(event.Name, "./static") {
-					if event.Op&fsnotify.Create == fsnotify.Create && !strings.HasSuffix(event.Name, ".gz") {
+					if event.Op&(fsnotify.Write|fsnotify.Create|fsnotify.Remove) != 0 {
 						// Get file info
 						info, err := os.Stat(event.Name)
 						if err != nil {
@@ -171,6 +178,8 @@ func main() {
 						// Only compress files larger than 1KB and depending on the file extension
 						if shouldCompressFile(event.Name, info.Size()) {
 							compressFile(event.Name)
+						} else if shouldCompressImage(event.Name) {
+							compressImage(event.Name)
 						}
 					}
 				}
@@ -254,8 +263,64 @@ func main() {
 	}
 }
 
+func shouldCompressImage(s string) bool {
+	return (strings.HasSuffix(s, ".jpg") || strings.HasSuffix(s, ".jpeg") ||
+		strings.HasSuffix(s, ".png") || strings.HasSuffix(s, ".gif")) &&
+		!strings.Contains(s, "_compressed")
+}
+
+func compressImage(path string) {
+	// Read the original image
+	imgFile, err := os.Open(path)
+	if err != nil {
+		log.Printf("Error opening image %s: %v", path, err)
+		return
+	}
+	defer imgFile.Close()
+
+	// Decode the image based on its format
+	var img image.Image
+	ext := strings.ToLower(filepath.Ext(path))
+	switch ext {
+	case ".jpg", ".jpeg":
+		img, err = jpeg.Decode(imgFile)
+	case ".png":
+		img, err = png.Decode(imgFile)
+	default:
+		log.Printf("Unsupported image format %s", path)
+		return
+	}
+	if err != nil {
+		log.Printf("Error decoding image %s: %v", path, err)
+		return
+	}
+
+	// Calculate new dimensions
+	newHeight := 200
+	newWidth := (img.Bounds().Dx() * newHeight) / img.Bounds().Dy()
+
+	// Create a new blank image with the new dimensions
+	newImg := image.NewRGBA(image.Rect(0, 0, newWidth, newHeight))
+
+	// Resize the original image to the new dimensions
+	draw.BiLinear.Scale(newImg, newImg.Bounds(), img, img.Bounds(), draw.Over, nil)
+
+	// Create the output file with "_compressed" suffix before the extension
+	outFile, err := os.Create(strings.TrimSuffix(path, filepath.Ext(path)) + "_compressed_" + strings.TrimPrefix(ext, ".") + ".jpg")
+	if err != nil {
+		log.Printf("Error creating compressed image file %s: %v", outFile.Name(), err)
+		return
+	}
+	defer outFile.Close()
+
+	// Encode the new image to the output file in JPEG format
+	err = jpeg.Encode(outFile, newImg, nil)
+	if err != nil {
+		log.Printf("Error encoding compressed image %s: %v", outFile.Name(), err)
+	}
+}
+
 func shouldCompressFile(s string, i int64) bool {
-	println(s + " " + fmt.Sprint(i))
 	if strings.HasSuffix(s, ".jpg") || strings.HasSuffix(s, ".jpeg") || strings.HasSuffix(s, ".png") || strings.HasSuffix(s, ".gif") ||
 		strings.HasSuffix(s, ".webp") || strings.HasSuffix(s, ".pdf") || strings.HasSuffix(s, ".mp3") || strings.HasSuffix(s, ".ogg") ||
 		strings.HasSuffix(s, ".flac") || strings.HasSuffix(s, ".mpg") || strings.HasSuffix(s, ".mp4") || strings.HasSuffix(s, ".avi") ||

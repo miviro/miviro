@@ -65,7 +65,7 @@
     }
 
     img {
-      @apply mx-auto;
+      @apply mx-auto hover:brightness-95;
     }
 
     #page-title {
