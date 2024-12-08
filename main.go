@@ -168,8 +168,8 @@ func main() {
 							log.Printf("Error getting file info %s: %v", event.Name, err)
 							continue
 						}
-						// Only compress files larger than 2KB
-						if info.Size() > 2*1024 {
+						// Only compress files larger than 2KB and not images
+						if shouldCompressFile(event.Name, info.Size()) {
 							compressFile(event.Name)
 						}
 					}
@@ -243,6 +243,18 @@ func main() {
 	if err := http.ListenAndServe(":8080", nil); err != nil {
 		log.Fatalf("Server failed to start: %v", err)
 	}
+}
+
+func shouldCompressFile(s string, i int64) bool {
+	if strings.HasSuffix(s, ".jpg") || strings.HasSuffix(s, ".jpeg") || strings.HasSuffix(s, ".png") || strings.HasSuffix(s, ".gif") ||
+		strings.HasSuffix(s, ".webp") || strings.HasSuffix(s, ".pdf") || strings.HasSuffix(s, ".mp3") || strings.HasSuffix(s, ".ogg") ||
+		strings.HasSuffix(s, ".flac") || strings.HasSuffix(s, ".mpg") || strings.HasSuffix(s, ".mp4") || strings.HasSuffix(s, ".avi") ||
+		strings.HasSuffix(s, ".zip") || strings.HasSuffix(s, ".gz") || strings.HasSuffix(s, ".bz2") || strings.HasSuffix(s, ".rar") ||
+		strings.HasSuffix(s, ".7z") || strings.HasSuffix(s, ".arj") || strings.HasSuffix(s, ".odf") || strings.HasSuffix(s, ".docx") ||
+		strings.HasSuffix(s, ".jar") || i < 2*1024 {
+		return false
+	}
+	return true
 }
 
 func loadArticles() {
