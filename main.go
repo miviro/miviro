@@ -57,8 +57,8 @@ func compressStaticFiles() {
 		if err != nil {
 			return err
 		}
-		if !info.IsDir() && !strings.HasSuffix(path, ".gz") {
-			if info.Size() > 2*1024 {
+		if !info.IsDir() {
+			if shouldCompressFile(path, info.Size()) {
 				compressFile(path)
 			}
 		}
@@ -168,7 +168,7 @@ func main() {
 							log.Printf("Error getting file info %s: %v", event.Name, err)
 							continue
 						}
-						// Only compress files larger than 2KB and not images
+						// Only compress files larger than 1KB and depending on the file extension
 						if shouldCompressFile(event.Name, info.Size()) {
 							compressFile(event.Name)
 						}
@@ -255,6 +255,7 @@ func main() {
 }
 
 func shouldCompressFile(s string, i int64) bool {
+	println(s + " " + fmt.Sprint(i))
 	if strings.HasSuffix(s, ".jpg") || strings.HasSuffix(s, ".jpeg") || strings.HasSuffix(s, ".png") || strings.HasSuffix(s, ".gif") ||
 		strings.HasSuffix(s, ".webp") || strings.HasSuffix(s, ".pdf") || strings.HasSuffix(s, ".mp3") || strings.HasSuffix(s, ".ogg") ||
 		strings.HasSuffix(s, ".flac") || strings.HasSuffix(s, ".mpg") || strings.HasSuffix(s, ".mp4") || strings.HasSuffix(s, ".avi") ||
