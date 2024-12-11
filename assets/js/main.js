@@ -12,9 +12,41 @@ async function loadParticles(options) {
     await tsParticles.load({ id: "tsparticles", options });
 }
 
+function initializeImageClickListeners() {
+    document.querySelectorAll('img').forEach(img => {
+        img.addEventListener('click', () => {
+            const src = img.src;
+            const match = src.match(/(.*)_compressed_(.*)\.jpg$/);
+            if (match) {
+                const newSrc = `${match[1]}.${match[2]}`;
+                const modal = document.createElement('div');
+                modal.style.position = 'fixed';
+                modal.style.top = '50%';
+                modal.style.left = '50%';
+                modal.style.transform = 'translate(-50%, -50%)';
+                modal.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
+                modal.style.padding = '20px';
+                modal.style.zIndex = '1000';
+
+                const newImg = document.createElement('img');
+                newImg.src = newSrc;
+                newImg.style.maxWidth = '90vw';
+                newImg.style.maxHeight = '90vh';
+
+                modal.appendChild(newImg);
+                document.body.appendChild(modal);
+
+                modal.addEventListener('click', () => {
+                    document.body.removeChild(modal);
+                });
+            }
+        });
+    });
+}
+
 const configs = {
     particles: {
-        number: { value: window.innerWidth / 100 },
+        number: { value: window.innerWidth / 10 },
         color: { value: "#ffffff" },
         links: { enable: true, distance: 200 },
         shape: { type: "circle" },
@@ -27,40 +59,15 @@ const configs = {
 };
 
 loadParticles(configs);
+initializeImageClickListeners();
 Alpine.start();
 
-
-document.querySelectorAll('img').forEach(img => {
-    img.addEventListener('click', () => {
-        const src = img.src;
-        const match = src.match(/(.*)_compressed_(.*)\.jpg$/);
-        if (match) {
-            const newSrc = `${match[1]}.${match[2]}`;
-            const modal = document.createElement('div');
-            modal.style.position = 'fixed';
-            modal.style.top = '50%';
-            modal.style.left = '50%';
-            modal.style.transform = 'translate(-50%, -50%)';
-            modal.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
-            modal.style.padding = '20px';
-            modal.style.zIndex = '1000';
-
-            const newImg = document.createElement('img');
-            newImg.src = newSrc;
-            newImg.style.maxWidth = '90vw';
-            newImg.style.maxHeight = '90vh';
-
-            modal.appendChild(newImg);
-            document.body.appendChild(modal);
-
-            modal.addEventListener('click', () => {
-                document.body.removeChild(modal);
-            });
-        }
-    });
-});
-// Re-initialize particles on history restore
+// Re-initialize particles and image click listeners on history restore
 document.body.addEventListener('htmx:historyRestore', () => {
     loadParticles(configs);
 });
 
+// TODO: incluirlo en mejor sitio
+document.body.addEventListener('htmx:afterSwap', () => {
+    initializeImageClickListeners();
+});
